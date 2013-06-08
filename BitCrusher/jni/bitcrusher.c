@@ -42,6 +42,7 @@ JNIEXPORT jlong JNICALL Java_com_noisepages_nettoyeur_bitcrusher_OpenSlBitCrushe
 JNIEXPORT void JNICALL Java_com_noisepages_nettoyeur_bitcrusher_OpenSlBitCrusher_closeNative
 (JNIEnv *env, jclass clazz, jlong bc) {
   opensl_close(((struct bitcrusher *)bc)->os);
+  free((void *)bc);
 }
 
 JNIEXPORT jint JNICALL Java_com_noisepages_nettoyeur_bitcrusher_OpenSlBitCrusher_startNative
