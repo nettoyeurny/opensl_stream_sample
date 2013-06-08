@@ -22,7 +22,7 @@ public class OpenSlBitCrusher {
 	 */
 	public void close() {
 		if (streamPtr == 0) {
-			throw new RuntimeException("Stream closed.");
+			throw new IllegalStateException("Stream closed.");
 		}
 		closeNative(streamPtr);
 		streamPtr = 0;
@@ -30,7 +30,7 @@ public class OpenSlBitCrusher {
 
 	public void start() throws IOException {
 		if (streamPtr == 0) {
-			throw new RuntimeException("Stream closed.");
+			throw new IllegalStateException("Stream closed.");
 		}
 		if (startNative(streamPtr) != 0) {
 			throw new IOException("Unable to start OpenSL stream.");
@@ -39,7 +39,7 @@ public class OpenSlBitCrusher {
 
 	public void stop() {
 		if (streamPtr == 0) {
-			throw new RuntimeException("Stream closed.");
+			throw new IllegalStateException("Stream closed.");
 		}
 		stopNative(streamPtr);
 	}
@@ -49,7 +49,7 @@ public class OpenSlBitCrusher {
 	 */
 	public void crush(int bits) {
 		if (streamPtr == 0) {
-			throw new RuntimeException("Stream closed.");
+			throw new IllegalStateException("Stream closed.");
 		}
 		crushNative(streamPtr, bits);
 	}
