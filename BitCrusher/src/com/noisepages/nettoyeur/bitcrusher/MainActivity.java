@@ -41,7 +41,7 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 	protected void onStart() {
 		super.onStart();
 		try {
-			bitCrusher =  (Build.VERSION.SDK_INT >= 17) ?
+			bitCrusher =  (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) ?
 					createBitCrusher() : createBitCrusherDefault();
 			setCrush(crushBar.getProgress());
 			if (playSwitch.isChecked()) {
