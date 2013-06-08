@@ -26,7 +26,7 @@ JNIEXPORT void JNICALL Java_com_noisepages_nettoyeur_bitcrusher_OpenSlBitCrusher
 /*
  * Class:     com_noisepages_nettoyeur_bitcrusher_OpenSlBitCrusher
  * Method:    startNative
- * Signature: (J)V
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_com_noisepages_nettoyeur_bitcrusher_OpenSlBitCrusher_startNative
   (JNIEnv *, jclass, jlong);
