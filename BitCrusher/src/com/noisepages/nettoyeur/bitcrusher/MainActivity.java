@@ -40,12 +40,12 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 	@Override
 	protected void onStart() {
 		super.onStart();
-		if (Build.VERSION.SDK_INT >= 17) {
-			createBitCrusher();
-		} else {
-			createBitCrusherDefault();
-		}
 		try {
+			if (Build.VERSION.SDK_INT >= 17) {
+				createBitCrusher();
+			} else {
+				createBitCrusherDefault();
+			}
 			setCrush(crushBar.getProgress());
 			if (playSwitch.isChecked()) {
 				bitCrusher.start();
@@ -57,27 +57,19 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 
 	// This method will choose the recommended configuration for OpenSL on JB MR1 and later.
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-	private void createBitCrusher() {
+	private OpenSlBitCrusher createBitCrusher() throws IOException {
 		// Detect native sample rate and buffer size. If at all possible, OpenSL should use
 		// these values.
 		AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		int sr = Integer.parseInt(am.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE));
 		int bs = Integer.parseInt(am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
-		try {
-			bitCrusher = new OpenSlBitCrusher(sr, bs);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return new OpenSlBitCrusher(sr, bs);
 	}
 	
 	// This method will choose a reasonable default on older devices, i.e., CD sample rate and
 	// 64 frames per buffer.
-	private void createBitCrusherDefault() {
-		try {
-			bitCrusher = new OpenSlBitCrusher(44100, 64);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+	private OpenSlBitCrusher createBitCrusherDefault() throws IOException {
+		return new OpenSlBitCrusher(44100, 64);
 	}
 	
 	@Override
