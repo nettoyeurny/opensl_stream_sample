@@ -7,14 +7,15 @@
 static void process(void *context, int sample_rate, int buffer_frames,
      int input_channels, const short *input_buffer,
      int output_channels, short *output_buffer) {
-  short mask = __sync_fetch_and_or((short *)context, 0);
   if (input_channels > 0) {
+    // We use gcc atomics here since the mask may change concurrently.
+    short mask = __sync_fetch_and_or((short *)context, 0);
     int i;
     for (i = 0; i < buffer_frames; ++i) {
+      short v = input_buffer[input_channels * i] & mask;
       int j;
       for (j = 0; j < output_channels; ++j) {
-        output_buffer[output_channels * i + j] =
-            input_buffer[input_channels * i] & mask;
+        output_buffer[output_channels * i + j] = v;
       }
     }
   }
