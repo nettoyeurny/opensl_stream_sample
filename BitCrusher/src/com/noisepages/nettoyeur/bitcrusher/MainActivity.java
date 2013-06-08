@@ -8,6 +8,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -17,10 +18,44 @@ import android.widget.Switch;
 
 public class MainActivity extends Activity implements OnCheckedChangeListener, OnSeekBarChangeListener {
 
+	private static interface BitCrusherFactory {
+		OpenSlBitCrusher createBitCrusher() throws IOException;
+	}
+
+	// This factory illustrates how to query OpenSL config parameters on Jelly Bean MR1 while maintaining
+	// backward compatibility with older versions of Android. The trick is to place the new API calls in
+	// a class that will only be loaded if we're running on JB MR1 or later.
+	private final BitCrusherFactory factory = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) ?
+			new BitCrusherFactory() {
+		@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+		@Override
+		public OpenSlBitCrusher createBitCrusher() throws IOException {
+			AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+			// Provide default values in case config lookup fails.
+			int sr = 44100;
+			int bs = 64;
+			try {
+				// If possible, query the native sample rate and buffer size.
+				sr = Integer.parseInt(am.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE));
+				bs = Integer.parseInt(am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
+			} catch (NumberFormatException e) {
+				Log.w("BitCrusher", "Failed to read native OpenSL config: " + e);
+			}
+			return new OpenSlBitCrusher(sr, bs);
+		}
+	} : new BitCrusherFactory() {
+		@Override
+		public OpenSlBitCrusher createBitCrusher() throws IOException {
+			// If the native sample rate and buffer size are not known, CD sample rate and 64 frames per
+			// buffer are a reasonable default.
+			return new OpenSlBitCrusher(44100, 64);
+		}
+	};
+
 	private OpenSlBitCrusher bitCrusher;
 	private SeekBar crushBar;
 	private Switch playSwitch;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,8 +76,7 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 	protected void onStart() {
 		super.onStart();
 		try {
-			bitCrusher =  (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) ?
-					createBitCrusher() : createBitCrusherDefault();
+			bitCrusher = factory.createBitCrusher();
 			setCrush(crushBar.getProgress());
 			if (playSwitch.isChecked()) {
 				bitCrusher.start();
@@ -52,23 +86,6 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 		}
 	}
 
-	// This method will choose the recommended configuration for OpenSL on JB MR1 and later.
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-	private OpenSlBitCrusher createBitCrusher() throws IOException {
-		// Detect native sample rate and buffer size. If at all possible, OpenSL should use
-		// these values.
-		AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		int sr = Integer.parseInt(am.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE));
-		int bs = Integer.parseInt(am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER));
-		return new OpenSlBitCrusher(sr, bs);
-	}
-	
-	// This method will choose a reasonable default on older devices, i.e., CD sample rate and
-	// 64 frames per buffer.
-	private OpenSlBitCrusher createBitCrusherDefault() throws IOException {
-		return new OpenSlBitCrusher(44100, 64);
-	}
-	
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -93,10 +110,6 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 		setCrush(progress);
 	}
 
-	private void setCrush(int depth) {
-		bitCrusher.crush(depth * 16 / 101);
-	}
-
 	@Override
 	public void onStartTrackingTouch(SeekBar seekBar) {
 		// Do nothing.
@@ -105,5 +118,9 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
 		// Do nothing.
+	}
+
+	private void setCrush(int depth) {
+		bitCrusher.crush(depth * 16 / 101);
 	}
 }
