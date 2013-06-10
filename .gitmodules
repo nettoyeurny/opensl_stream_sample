@@ -1,3 +1,6 @@
 [submodule "BitCrusher/jni/opensl_stream"]
 	path = BitCrusher/jni/opensl_stream
 	url = git://github.com/nettoyeurny/opensl_stream.git
+[submodule "OpenSlStreamSample/jni/opensl_stream"]
+	path = OpenSlStreamSample/jni/opensl_stream
+	url = git://github.com/nettoyeurny/opensl_stream.git
