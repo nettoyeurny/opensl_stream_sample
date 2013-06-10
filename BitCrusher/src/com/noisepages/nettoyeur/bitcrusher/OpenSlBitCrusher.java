@@ -45,7 +45,7 @@ public class OpenSlBitCrusher {
 	}
 	
 	/**
-	 * @param number of bits to crush, 0 <= bits < 15; 0 means no effect.
+	 * @param number of bits to crush, 0 <= bits < 16; 0 means no effect.
 	 */
 	public void crush(int bits) {
 		if (streamPtr == 0) {
