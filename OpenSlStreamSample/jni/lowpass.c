@@ -15,10 +15,12 @@ static void process(void *context, int sample_rate, int buffer_frames,
      int output_channels, short *output_buffer) {
   if (input_channels > 0) {
     struct lowpass *lp = (struct lowpass *)context;
-    // We use gcc atomics here since alpha may change concurrently.
+    // We use gcc atomics here because alpha may change concurrently.
     int alpha = __sync_fetch_and_or(&lp->alpha, 0);
     int i;
     for (i = 0; i < buffer_frames; ++i) {
+      // No need to protect lp->prev with gcc atomics because we won't change
+      // it concurrently.
       int v = (alpha * input_buffer[input_channels * i] +
                (100 - alpha) * lp->prev) / 100;
       lp->prev = v;
