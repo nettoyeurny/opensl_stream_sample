@@ -26,8 +26,12 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 	// backward compatibility with older versions of Android. The trick is to place the new API calls in
 	// a class that will only be loaded if we're running on JB MR1 or later.
 	private final LowpassFactory factory = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) ?
-			new LowpassFactory() {
-		@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+			new JellyBeanMr1LowpassFactory() : new DefaultLowpassFactory();
+
+	// Factory implementation for Jelly Bean MR1 or later. Note that this class cannot be static because
+	// the lookup of OpenSL parameters requires the context provided by the enclosing activity.
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+	private class JellyBeanMr1LowpassFactory implements LowpassFactory {
 		@Override
 		public Lowpass createLowpass() throws IOException {
 			AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -43,7 +47,10 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 			}
 			return new Lowpass(sr, bs);
 		}
-	} : new LowpassFactory() {
+	};
+	
+	// Default factory for Jelly Bean or older.
+	private static class DefaultLowpassFactory implements LowpassFactory {
 		@Override
 		public Lowpass createLowpass() throws IOException {
 			// If the native sample rate and buffer size are not known, CD sample rate and 64 frames per
@@ -51,7 +58,7 @@ public class MainActivity extends Activity implements OnCheckedChangeListener, O
 			return new Lowpass(44100, 64);
 		}
 	};
-
+	
 	private Lowpass lowpass;
 	private SeekBar filterBar;
 	private Switch playSwitch;
