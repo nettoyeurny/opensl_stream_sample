@@ -11,6 +11,10 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Switch;
 
+/**
+ * Main activity for OpenSL sample app. This class is essentially boilerplate;
+ * most of the interesting bits are in {@link OpenSlParams} and {@link Lowpass}.
+ */
 public class MainActivity extends Activity implements OnCheckedChangeListener, OnSeekBarChangeListener {
 
 	private Lowpass lowpass;
