@@ -4,12 +4,15 @@
 
 #include "opensl_stream/opensl_stream.h"
 
+// Container holding an opensl_stream instance as well as two properties of the
+// lowpass filter, the smoothing factor and the previous sample.
 static struct lowpass {
   OPENSL_STREAM *os;
   int alpha;
   int prev;
 };
 
+// Audio processing callback; this is the heart and soul of this file.
 static void process(void *context, int sample_rate, int buffer_frames,
      int input_channels, const short *input_buffer,
      int output_channels, short *output_buffer) {
@@ -32,7 +35,7 @@ static void process(void *context, int sample_rate, int buffer_frames,
   }
 }
 
-JNIEXPORT jlong JNICALL Java_com_noisepages_nettoyeur_openslstreamsample_Lowpass_configure
+JNIEXPORT jlong JNICALL Java_com_noisepages_nettoyeur_openslstreamsample_Lowpass_open
 (JNIEnv *env, jclass clazz, jint sampleRate, jint bufferSize) {
   struct lowpass *lp = malloc(sizeof(struct lowpass));
   if (lp) {
@@ -70,4 +73,10 @@ JNIEXPORT void JNICALL Java_com_noisepages_nettoyeur_openslstreamsample_Lowpass_
 (JNIEnv *env, jclass clazz, jlong p, jint alpha) {
   struct lowpass *lp = (struct lowpass *)p;
   __sync_bool_compare_and_swap(&lp->alpha, lp->alpha, alpha);
+}
+
+JNIEXPORT jboolean JNICALL Java_com_noisepages_nettoyeur_openslstreamsample_Lowpass_isRunning
+(JNIEnv *env, jclass clazz, jlong p) {
+  struct lowpass *lp = (struct lowpass *)p;
+  return opensl_is_running(lp->os);
 }

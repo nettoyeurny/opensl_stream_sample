@@ -9,10 +9,10 @@ extern "C" {
 #endif
 /*
  * Class:     com_noisepages_nettoyeur_openslstreamsample_Lowpass
- * Method:    configure
+ * Method:    open
  * Signature: (II)J
  */
-JNIEXPORT jlong JNICALL Java_com_noisepages_nettoyeur_openslstreamsample_Lowpass_configure
+JNIEXPORT jlong JNICALL Java_com_noisepages_nettoyeur_openslstreamsample_Lowpass_open
   (JNIEnv *, jclass, jint, jint);
 
 /*
@@ -46,6 +46,14 @@ JNIEXPORT void JNICALL Java_com_noisepages_nettoyeur_openslstreamsample_Lowpass_
  */
 JNIEXPORT void JNICALL Java_com_noisepages_nettoyeur_openslstreamsample_Lowpass_setAlpha
   (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     com_noisepages_nettoyeur_openslstreamsample_Lowpass
+ * Method:    isRunning
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_noisepages_nettoyeur_openslstreamsample_Lowpass_isRunning
+  (JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 }
